@@ -1,0 +1,55 @@
+# Sample Aegis-MCP policy configuration.
+#
+# Aegis sits between an AI host (Claude Desktop, Cursor, ...) and downstream MCP
+# servers. It exposes only the capabilities permitted by the *active profile*,
+# namespaces every tool by its origin server, and gates profile switches through
+# a transition graph (with optional human approval).
+
+servers:
+  filesystem:
+    transport: stdio
+    command: mcp-fs
+    args: ["/repo"]
+  github:
+    transport: stdio
+    command: mcp-github
+    args: []
+  sonarqube:
+    transport: stdio
+    command: mcp-sonarqube
+    args: []
+
+profiles:
+  # Baseline: read-only filesystem access, scoped to the repo tree.
+  default:
+    allow:
+      - filesystem.read_file
+    resources:
+      - "file:///repo/**"
+    allowed_transitions:
+      - code-review
+
+  # Code review adds GitHub search and SonarQube analysis on top of default.
+  code-review:
+    extends: default
+    allow:
+      - github.search
+      - sonarqube.*
+    resources:
+      - "github://repo/pulls/**"
+    allowed_transitions:
+      - default
+      - deploy
+
+  # Deploy is the high-privilege profile; reaching it requires human approval.
+  deploy:
+    extends: code-review
+    allow:
+      - github.deploy
+    allowed_transitions:
+      - default
+
+activation:
+  default_profile: default
+
+error_disclosure: verbose
