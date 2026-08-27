@@ -1,0 +1,67 @@
+version: 2
+project_name: aegis
+
+before:
+  hooks:
+    - go mod tidy
+    - go test ./...
+
+builds:
+  - id: aegis
+    main: ./cmd/aegis
+    binary: aegis
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      - darwin
+      - windows
+    goarch:
+      - amd64
+      - arm64
+    ldflags:
+      - -s -w
+
+archives:
+  - id: default
+    formats: [tar.gz]
+    format_overrides:
+      - goos: windows
+        formats: [zip]
+    files:
+      - LICENSE
+      - README.md
+      - testdata/aegis.yaml
+      - docs/**/*
+
+checksum:
+  name_template: "checksums.txt"
+
+changelog:
+  use: github
+  sort: asc
+  filters:
+    exclude:
+      - "^docs:"
+      - "^chore:"
+      - "^ci:"
+
+release:
+  draft: false
+  footer: |
+    ## Verify a download
+
+    Compare against `checksums.txt`:
+
+    ```sh
+    sha256sum -c checksums.txt --ignore-missing
+    ```
+
+    ## Quick start
+
+    ```sh
+    AEGIS_CONFIG=testdata/aegis.yaml ./aegis
+    ```
+
+    See the [README](https://github.com/osick/mcp-zerotrust#readme) for the profile
+    model, the manual acceptance test, and the security properties.
