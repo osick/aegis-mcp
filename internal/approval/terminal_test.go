@@ -21,6 +21,9 @@ func TestTerminalChannelNotify(t *testing.T) {
 	if !strings.Contains(out, "aegis approve ") {
 		t.Errorf("output must instruct how to approve: %q", out)
 	}
+	if !strings.Contains(out, "aegis deny ") {
+		t.Errorf("output must instruct how to deny: %q", out)
+	}
 }
 
 func TestTerminalChannelSatisfiesChannel(t *testing.T) {

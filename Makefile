@@ -1,7 +1,9 @@
-.PHONY: test cover build
+.PHONY: test cover race build
 test:
 	go test ./...
 cover:
 	go test -cover ./...
+race:
+	go test -race ./...
 build:
 	go build -o aegis ./cmd/aegis

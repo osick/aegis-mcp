@@ -149,8 +149,15 @@ func (c *Core) SetProfile(target string, human bool) SetProfileResult {
 	}
 }
 
-// ApplyApproval completes a pending escalation after the human approves it via the CLI.
-func (c *Core) ApplyApproval(id string) bool { return c.ps.ApplyIfApproved(id) }
+// ApplyApproval completes a pending escalation after the human approves it via
+// the CLI, auditing the applied switch as a human decision.
+func (c *Core) ApplyApproval(id string) bool {
+	if !c.ps.ApplyIfApproved(id) {
+		return false
+	}
+	c.aud.Emit(audit.Record{Decision: "switch", Profile: c.ps.Active(), Source: srcStr(true)})
+	return true
+}
 
 func srcStr(human bool) string {
 	if human {

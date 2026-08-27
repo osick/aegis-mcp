@@ -21,4 +21,5 @@ func NewTerminalChannel(w io.Writer) *TerminalChannel {
 func (t *TerminalChannel) Notify(r Request) {
 	fmt.Fprintf(t.w, "[aegis] approval required: id=%s requesting profile %q\n", r.ID, r.ToProf)
 	fmt.Fprintf(t.w, "[aegis] to approve, run: aegis approve %s\n", r.ID)
+	fmt.Fprintf(t.w, "[aegis] to deny,    run: aegis deny %s\n", r.ID)
 }

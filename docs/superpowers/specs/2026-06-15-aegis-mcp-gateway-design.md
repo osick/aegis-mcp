@@ -182,7 +182,7 @@ without breaking the file format.
 ### 4.4 Wildcard policy
 
 Glob is allowed inside profile allow-lists as operator convenience. The pattern
-`idea.md` bans — a *blind, per-server blanket grant* handed to a server — does not exist
+the original product sketch bans — a *blind, per-server blanket grant* handed to a server — does not exist
 in this model: there is no per-server grant at all. All access flows through profile
 allow-lists, each an explicit operator choice.
 

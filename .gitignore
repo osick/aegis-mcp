@@ -2,3 +2,9 @@
 /dist/
 *.out
 workspace/
+tmp/
+
+# Local, never published: business notes, AI-session state, editor settings.
+info/
+.vibe/
+.claude/

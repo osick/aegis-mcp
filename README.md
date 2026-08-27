@@ -37,14 +37,19 @@ dial the downstream servers declared in the config.
 
 ```sh
 make build
-AEGIS_CONFIG=testdata/aegis.yaml ./aegis
+AEGIS_CONFIG=testdata/aegis.yaml ./aegis   # run the gateway (stdio MCP server)
+./aegis approve apr_1                      # approve a pending profile switch
+./aegis deny apr_1                         # deny it instead
 ```
 
 - `AEGIS_CONFIG` selects the policy file (defaults to `aegis.yaml`). If it cannot be
   loaded or validated, Aegis refuses to start (**fail-closed**, exit 1).
 - Each configured downstream server is dialed as a stdio subprocess. If a server fails to
   start it is skipped (per-server fail-closed) and the rest continue.
-- Audit records are written as JSON lines to stdout; approval prompts to stderr.
+- Audit records are JSON lines on **stderr** by default, or an append-only file if
+  `AEGIS_AUDIT_LOG=<path>` is set — never stdout, which is reserved for the MCP
+  protocol ([ADR 007](docs/architecture/ADR_007_audit_stream_off_stdout.md)).
+  Approval prompts also go to stderr.
 
 ## The profile model
 
@@ -65,9 +70,12 @@ The host (agent) requests a switch via the `aegis.set_profile` meta-tool:
 - If the target is in the active profile's `allowed_transitions`, the switch happens
   immediately.
 - Otherwise Aegis returns `AEGIS_PENDING_APPROVAL` with an approval id, prints a prompt to
-  stderr, and keeps the old profile active. A human approves out-of-band
-  (`aegis approve <id>`); the agent then calls `aegis.approval_status` to apply it.
-  Approvals are **single-use** and **bound to the profile they were granted from**.
+  stderr, and keeps the old profile active. A human decides out-of-band by running
+  `aegis approve <id>` (or `aegis deny <id>`) — delivered to the running gateway over a
+  per-user unix socket ([ADR 008](docs/architecture/ADR_008_approval_ipc_unix_socket.md));
+  the agent then calls `aegis.approval_status` to apply it, and the applied switch is
+  audited as a human decision. Approvals are **single-use** and **bound to the profile
+  they were granted from**.
 
 Tools and resources outside the active profile are invisible in `tools/list` /
 `resources/list` and blocked (with a structured `AEGIS_CAP_DENIED` /
@@ -87,11 +95,12 @@ internal/                  All logic. Split into a network-free "pure core" and 
   naming/                  PURE CORE — server__tool wire names, collision detection, anti-shadowing
   aegiserr/                PURE CORE — stable structured errors with configurable disclosure
   audit/                   PURE CORE — structured JSON decision log (one record per decision)
+  approvalipc/             `aegis approve/deny <id>` → running gateway, over a per-user unix socket
   gateway/                 I/O SHELL — adapts the official MCP Go SDK to the pure core:
                            DownstreamClient seam, registry, router, Core, the enforcing
                            middleware (server.go), and the real-SDK end-to-end tests
 testdata/aegis.yaml        Sample policy (filesystem / github / sonarqube; default/code-review/deploy)
-docs/architecture/         ADR_001–006: the key design decisions and their rationale
+docs/architecture/         ADR_001–008: the key design decisions and their rationale
 docs/superpowers/specs/    Full design spec (Cycle 1)
 docs/superpowers/plans/    The task-by-task implementation plan
 ```
@@ -115,8 +124,9 @@ Enforced and regression-tested (verified by two adversarial review rounds):
 - **Anti-shadowing** — origin-namespaced tool names + startup collision detection. ([ADR 005](docs/architecture/ADR_005_tool_name_namespacing.md))
 - **Non-blocking HITL** — escalations never hold the JSON-RPC call open (no host deadlock);
   approvals are single-use and context-bound. ([ADR 003](docs/architecture/ADR_003_non_blocking_hitl.md))
-- **Fail-closed** — bad config refuses to start; an unreachable downstream drops out
-  rather than opening access; every denial is audited, never silent.
+- **Fail-closed** — bad config, an unopenable audit log, or an unbindable approval
+  socket refuses to start; an unreachable downstream drops out rather than opening
+  access; every denial — and every applied human approval — is audited, never silent.
 
 ## Build and test
 
@@ -132,7 +142,8 @@ go test -race ./... # race detector (gateway maps are mutex-guarded)
 
 The pure-core packages sit at 82–100% coverage; the SDK-facing `gateway` at ~88%. The
 end-to-end tests in `internal/gateway/` exercise a **real** MCP SDK server over an
-in-memory transport, and a real stdio subprocess — not mocks.
+in-memory transport, and a real stdio subprocess — not mocks. CI runs build, vet, and
+the race-enabled suite on every push and pull request.
 
 ## Manual acceptance test
 
@@ -151,6 +162,10 @@ in-memory transport, and a real stdio subprocess — not mocks.
 6. Ask the agent to `set_profile` to `deploy` from `default` (not a direct edge): expect
    `AEGIS_PENDING_APPROVAL` and a prompt on stderr; the profile stays unchanged until a
    human approves.
+7. In another terminal, run `aegis approve <id>` with the id from the prompt (expect `ok`),
+   then have the agent call `aegis.approval_status` with that id: the switch applies, the
+   `deploy` tools become visible, and the audit log records the switch with
+   `"source":"human"`.
 
 ## Roadmap
 
@@ -169,4 +184,10 @@ argument-level constraints, resource *content*-injection inspection, and timed a
 
 - Design spec — `docs/superpowers/specs/2026-06-15-aegis-mcp-gateway-design.md`
 - Implementation plan — `docs/superpowers/plans/2026-06-15-aegis-mcp-gateway-cycle1.md`
-- Architecture decisions — `docs/architecture/ADR_001`…`ADR_006`
+- Architecture decisions — `docs/architecture/ADR_001`…`ADR_008`
+- Reporting vulnerabilities — [docs/SECURITY.md](docs/SECURITY.md)
+- Contributing — [docs/CONTRIBUTING.md](docs/CONTRIBUTING.md)
+
+## License
+
+Apache License 2.0 — see [LICENSE](LICENSE).
