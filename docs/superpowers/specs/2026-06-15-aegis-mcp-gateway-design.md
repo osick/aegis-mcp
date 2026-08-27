@@ -98,7 +98,7 @@ flowchart LR
     FS["filesystem MCP"]
     SQ["sonarqube MCP"]
     GH["github MCP …"]
-    Host <-- "stdio (MCP)" --> Aegis
+    Host <-->|"stdio (MCP)"| Aegis
     Aegis -- "stdio/HTTP" --> FS
     Aegis -- "stdio/HTTP" --> SQ
     Aegis -- "stdio/HTTP" --> GH
