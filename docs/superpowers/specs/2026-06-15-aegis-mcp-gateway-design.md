@@ -91,12 +91,17 @@ than hand-rolling JSON-RPC. **Aggregating proxy (1:N)**: the host is configured 
 to exactly one MCP server — Aegis — which fronts all downstream servers and presents a
 single filtered tool surface upward.
 
-```
-┌──────────────┐   stdio (MCP)   ┌─────────────────────────┐   stdio/HTTP   ┌────────────────┐
-│  AI Host     │ ──────────────► │        Aegis-MCP        │ ─────────────► │ filesystem MCP │
-│ (Claude/     │ ◄────────────── │  (aggregating gateway)  │ ─────────────► │ sonarqube MCP  │
-│  Cursor)     │                 │                         │ ─────────────► │ github MCP ... │
-└──────────────┘                 └─────────────────────────┘                └────────────────┘
+```mermaid
+flowchart LR
+    Host["AI Host<br>(Claude Desktop, Cursor, …)"]
+    Aegis["Aegis-MCP<br>(aggregating gateway)"]
+    FS["filesystem MCP"]
+    SQ["sonarqube MCP"]
+    GH["github MCP …"]
+    Host <-- "stdio (MCP)" --> Aegis
+    Aegis -- "stdio/HTTP" --> FS
+    Aegis -- "stdio/HTTP" --> SQ
+    Aegis -- "stdio/HTTP" --> GH
 ```
 
 **Why aggregator, not 1:1 wrapper.** Context-aware filtering is a cross-server decision
@@ -309,12 +314,13 @@ prefix convention (§4.7).
 
 ### 6.2 `*/call` (`tools/call`, `resources/read`, `prompts/get`)
 
-```
-host → hostsession → naming (resolve server__tool → server.tool)
-   → enforcer.authorize(activeProfile, capability, args)
-   ├─ deny  → audit(deny, reason) → structured MCP error to host; downstream untouched
-   └─ allow → audit(allow) → router → downstream server → response relayed up
-                                       (response-hook present; pass-through in Cycle 1)
+```mermaid
+flowchart TD
+    A["host request"] --> B["naming: resolve<br>server__tool → server.tool"]
+    B --> C{"enforcer.authorize<br>(activeProfile, capability, args)"}
+    C -- deny --> D["audit(deny, reason)"] --> E["structured MCP error to host<br>downstream untouched"]
+    C -- allow --> F["audit(allow)"] --> G["router → downstream server"]
+    G --> H["response relayed up<br>(response-hook present; pass-through in Cycle 1)"]
 ```
 
 ### 6.3 `aegis.set_profile` / `aegis.approval_status`

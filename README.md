@@ -11,13 +11,21 @@ shadowed, and gates profile escalations through an explicit transition graph wit
 non-blocking human-in-the-loop approval. Every security decision is written to a
 structured audit log.
 
+```mermaid
+flowchart LR
+    Host["AI Host<br>(Claude Desktop, Cursor, …)"]
+    Aegis["Aegis-MCP<br>aggregating gateway<br>policy · audit · HITL"]
+    FS["filesystem MCP"]
+    GH["github MCP"]
+    SQ["sonarqube MCP"]
+    Host <-- "stdio (MCP)<br>filtered + namespaced" --> Aegis
+    Aegis -- stdio --> FS
+    Aegis -- stdio --> GH
+    Aegis -- stdio --> SQ
 ```
-┌──────────────┐   stdio (MCP)   ┌─────────────────────────┐   stdio   ┌────────────────┐
-│  AI Host     │ ──────────────► │        Aegis-MCP        │ ────────► │ filesystem MCP │
-│ (Claude/     │ ◄────────────── │  (aggregating gateway)  │ ────────► │ github MCP     │
-│  Cursor)     │   filtered +    │  policy · audit · HITL  │ ────────► │ sonarqube MCP  │
-└──────────────┘   namespaced    └─────────────────────────┘           └────────────────┘
-```
+
+More diagrams — use cases, enforcement and approval flows, the approval lifecycle —
+in [docs/diagrams.md](docs/diagrams.md).
 
 This repository contains **Cycle 1**: the open-source local sidecar. See
 [Roadmap](#roadmap) for what's next.
@@ -100,7 +108,8 @@ internal/                  All logic. Split into a network-free "pure core" and 
                            DownstreamClient seam, registry, router, Core, the enforcing
                            middleware (server.go), and the real-SDK end-to-end tests
 testdata/aegis.yaml        Sample policy (filesystem / github / sonarqube; default/code-review/deploy)
-docs/architecture/         ADR_001–008: the key design decisions and their rationale
+docs/architecture/         ADR_001–009: the key design decisions and their rationale
+docs/diagrams.md           Use-case, flow, sequence, and state diagrams (Mermaid)
 docs/superpowers/specs/    Full design spec (Cycle 1)
 docs/superpowers/plans/    The task-by-task implementation plan
 ```
@@ -131,7 +140,11 @@ Enforced and regression-tested (verified by two adversarial review rounds):
 ## Build and test
 
 Requires Go 1.26+ (the version `go.mod` targets). The only external dependency is the
-official `github.com/modelcontextprotocol/go-sdk` (plus `gopkg.in/yaml.v3`).
+official `github.com/modelcontextprotocol/go-sdk` v1.7.0 (plus `gopkg.in/yaml.v3`).
+The SDK negotiates the protocol version per connection, so both classic
+(2025-06-18/2025-11-25) hosts and downstream servers on either side of the
+2026-07-28 spec work; see
+[ADR 009](docs/architecture/ADR_009_mcp_spec_2026_07_28_posture.md).
 
 ```sh
 make build          # build ./aegis
@@ -174,7 +187,8 @@ Aegis is open-core: the local sidecar is OSS; a central control plane is the com
 - **Cycle 1 — this repo (done):** aggregating proxy, default-deny policy, context profiles,
   traversal-safe resource matching, tool namespacing, non-blocking HITL, audit log.
 - **Cycle 2:** kernel sandboxing (seccomp/Seatbelt) + egress/DNS control for downstream servers.
-- **Cycle 3:** OAuth 2.1/PKCE token broker + central control plane (fleet policy, audit
+- **Cycle 3:** OAuth 2.1/PKCE token broker (Client ID Metadata Documents; DCR is
+  deprecated as of MCP 2026-07-28) + central control plane (fleet policy, audit
   aggregation, dashboards).
 
 Deferred within Cycle 1 (tracked in the [spec](docs/superpowers/specs/2026-06-15-aegis-mcp-gateway-design.md) §10):
@@ -184,7 +198,8 @@ argument-level constraints, resource *content*-injection inspection, and timed a
 
 - Design spec — `docs/superpowers/specs/2026-06-15-aegis-mcp-gateway-design.md`
 - Implementation plan — `docs/superpowers/plans/2026-06-15-aegis-mcp-gateway-cycle1.md`
-- Architecture decisions — `docs/architecture/ADR_001`…`ADR_008`
+- Architecture decisions — `docs/architecture/ADR_001`…`ADR_009`
+- Diagrams — [docs/diagrams.md](docs/diagrams.md)
 - Reporting vulnerabilities — [docs/SECURITY.md](docs/SECURITY.md)
 - Contributing — [docs/CONTRIBUTING.md](docs/CONTRIBUTING.md)
 
