@@ -4,9 +4,9 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/aegis-mcp/aegis/internal/audit"
-	"github.com/aegis-mcp/aegis/internal/enforcer"
-	"github.com/aegis-mcp/aegis/internal/profilestate"
+	"github.com/osick/aegis-mcp/internal/audit"
+	"github.com/osick/aegis-mcp/internal/enforcer"
+	"github.com/osick/aegis-mcp/internal/profilestate"
 )
 
 // Core is the SDK-independent orchestration layer: it ties together the

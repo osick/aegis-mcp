@@ -1,31 +1,54 @@
 # Aegis-MCP
 
-**A zero-trust security gateway for the Model Context Protocol (MCP).**
+[![CI](https://github.com/osick/aegis-mcp/actions/workflows/ci.yml/badge.svg)](https://github.com/osick/aegis-mcp/actions/workflows/ci.yml)
+[![Release](https://img.shields.io/github/v/release/osick/aegis-mcp)](https://github.com/osick/aegis-mcp/releases)
+[![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
+[![Go](https://img.shields.io/badge/Go-1.26-00ADD8?logo=go&logoColor=white)](go.mod)
 
-Aegis-MCP sits as a single MCP server between an AI host (Claude Desktop, Cursor, …) and
-any number of downstream MCP servers, and enforces capability-level scopes on every
-transaction. Instead of granting a downstream server blanket access, Aegis exposes only
-the tools and resources permitted by the currently **active profile**, namespaces every
-tool by its origin server (`filesystem__read_file`) so tools cannot be spoofed or
-shadowed, and gates profile escalations through an explicit transition graph with
-non-blocking human-in-the-loop approval. Every security decision is written to a
-structured audit log.
+**Least privilege for AI agents. A zero-trust security gateway for the Model Context
+Protocol, in a single Go binary.**
+
+Your MCP setup today is a blanket grant: every connected server exposes every tool to
+the agent, all the time. Aegis-MCP ends that. It sits as the one MCP server your AI
+host talks to, fronts all your real servers, and enforces **capability-level scopes on
+every single transaction** — the agent sees only what the active security profile
+permits, escalations need a human, and every decision lands in an audit log.
 
 ```mermaid
 flowchart LR
-    Host["AI Host<br>(Claude Desktop, Cursor, …)"]
-    Aegis["Aegis-MCP<br>aggregating gateway<br>policy · audit · HITL"]
+    Host["AI Host<br>Claude Desktop, Cursor, ..."]
+    Aegis["Aegis-MCP gateway<br>policy - audit - HITL"]
     FS["filesystem MCP"]
     GH["github MCP"]
     SQ["sonarqube MCP"]
-    Host <-->|"stdio (MCP)<br>filtered + namespaced"| Aegis
-    Aegis -- stdio --> FS
-    Aegis -- stdio --> GH
-    Aegis -- stdio --> SQ
+    Host -->|"stdio (MCP)"| Aegis
+    Aegis -->|"filtered + namespaced"| Host
+    Aegis --> FS
+    Aegis --> GH
+    Aegis --> SQ
 ```
 
 More diagrams — use cases, enforcement and approval flows, the approval lifecycle —
 in [docs/diagrams.md](docs/diagrams.md).
+
+## What you get
+
+- **Default-deny capability profiles** — tools and resources outside the active profile
+  are invisible in `tools/list` and blocked if called anyway.
+- **No agent self-elevation** — profile switches follow a pre-declared transition graph;
+  everything else requires a human decision (`aegis approve <id>`), delivered without
+  blocking the agent or deadlocking the host.
+- **Anti-spoofing tool names** — every tool is namespaced by its origin server
+  (`filesystem__read_file`), with startup collision detection against shadowing.
+- **Traversal-safe resource scoping** — URI patterns are matched host-aware after
+  canonicalization; `../` and encoded traversal are rejected.
+- **Audit everything** — one structured JSON record per security decision, including
+  human approvals. Denials are never silent.
+- **Fail-closed by construction** — invalid policy, an unopenable audit log, or an
+  unbindable approval socket refuse to start.
+- **Small, auditable footprint** — one static binary, two runtime dependencies
+  (the official MCP Go SDK and yaml.v3), a network-free pure core at 82–100% test
+  coverage, race-clean.
 
 This repository contains **Cycle 1**: the open-source local sidecar. See
 [Roadmap](#roadmap) for what's next.
@@ -37,6 +60,23 @@ injection, tool poisoning, broad token passthrough, and command execution. Aegis
 protocol-specific firewall for MCP traffic, built on the zero-trust principles in
 Anthropic's *Zero Trust for AI Agents*: **assume breach, verify every interaction, least
 privilege, agent identity, continuous monitoring**.
+
+## Install
+
+Download a prebuilt binary for Linux, macOS, or Windows (amd64/arm64) from the
+[latest release](https://github.com/osick/aegis-mcp/releases/latest), verify it
+against `checksums.txt`, and drop it on your `PATH` — or build from source:
+
+```sh
+git clone https://github.com/osick/aegis-mcp
+cd aegis-mcp && make build   # requires Go 1.26+
+```
+
+Or with the Go toolchain directly (releases v0.1.1 and later):
+
+```sh
+go install github.com/osick/aegis-mcp/cmd/aegis@latest
+```
 
 ## How it runs
 

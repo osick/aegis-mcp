@@ -60,7 +60,7 @@ Dependency direction: `config` ← `policy` ← {`enforcer`, `profilestate`} ; `
 
 Run:
 ```bash
-go mod init github.com/aegis-mcp/aegis
+go mod init github.com/osick/aegis-mcp
 go get github.com/modelcontextprotocol/go-sdk/mcp@v1.2.0
 go get gopkg.in/yaml.v3
 ```
@@ -286,7 +286,7 @@ package policy
 import (
 	"testing"
 
-	"github.com/aegis-mcp/aegis/internal/config"
+	"github.com/osick/aegis-mcp/internal/config"
 )
 
 func compile(t *testing.T, c *config.Config) *Policy {
@@ -352,7 +352,7 @@ import (
 	"fmt"
 	"path"
 
-	"github.com/aegis-mcp/aegis/internal/config"
+	"github.com/osick/aegis-mcp/internal/config"
 )
 
 type compiledProfile struct {
@@ -454,7 +454,7 @@ package policy
 import (
 	"testing"
 
-	"github.com/aegis-mcp/aegis/internal/config"
+	"github.com/osick/aegis-mcp/internal/config"
 )
 
 func TestResourceMatchingAndTraversal(t *testing.T) {
@@ -589,7 +589,7 @@ package policy
 import (
 	"testing"
 
-	"github.com/aegis-mcp/aegis/internal/config"
+	"github.com/osick/aegis-mcp/internal/config"
 )
 
 func TestTransitions(t *testing.T) {
@@ -957,9 +957,9 @@ package profilestate
 import (
 	"testing"
 
-	"github.com/aegis-mcp/aegis/internal/approval"
-	"github.com/aegis-mcp/aegis/internal/config"
-	"github.com/aegis-mcp/aegis/internal/policy"
+	"github.com/osick/aegis-mcp/internal/approval"
+	"github.com/osick/aegis-mcp/internal/config"
+	"github.com/osick/aegis-mcp/internal/policy"
 )
 
 type nopChannel struct{}
@@ -1052,8 +1052,8 @@ package profilestate
 import (
 	"sync"
 
-	"github.com/aegis-mcp/aegis/internal/approval"
-	"github.com/aegis-mcp/aegis/internal/policy"
+	"github.com/osick/aegis-mcp/internal/approval"
+	"github.com/osick/aegis-mcp/internal/policy"
 )
 
 type Source int
@@ -1285,8 +1285,8 @@ package enforcer
 import (
 	"testing"
 
-	"github.com/aegis-mcp/aegis/internal/config"
-	"github.com/aegis-mcp/aegis/internal/policy"
+	"github.com/osick/aegis-mcp/internal/config"
+	"github.com/osick/aegis-mcp/internal/policy"
 )
 
 func mk(t *testing.T) *Enforcer {
@@ -1348,8 +1348,8 @@ Expected: FAIL — `undefined: New`.
 package enforcer
 
 import (
-	"github.com/aegis-mcp/aegis/internal/aegiserr"
-	"github.com/aegis-mcp/aegis/internal/policy"
+	"github.com/osick/aegis-mcp/internal/aegiserr"
+	"github.com/osick/aegis-mcp/internal/policy"
 )
 
 type Capability struct {
@@ -1630,7 +1630,7 @@ import (
 	"context"
 	"testing"
 
-	"github.com/aegis-mcp/aegis/internal/naming"
+	"github.com/osick/aegis-mcp/internal/naming"
 )
 
 func newRegistry(t *testing.T) *Registry {
@@ -1694,7 +1694,7 @@ import (
 	"context"
 	"sort"
 
-	"github.com/aegis-mcp/aegis/internal/naming"
+	"github.com/osick/aegis-mcp/internal/naming"
 )
 
 // AggregatedTool is a downstream tool with its namespaced wire name.
@@ -1761,7 +1761,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/aegis-mcp/aegis/internal/naming"
+	"github.com/osick/aegis-mcp/internal/naming"
 )
 
 type Router struct {
@@ -1816,12 +1816,12 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/aegis-mcp/aegis/internal/approval"
-	"github.com/aegis-mcp/aegis/internal/audit"
-	"github.com/aegis-mcp/aegis/internal/config"
-	"github.com/aegis-mcp/aegis/internal/enforcer"
-	"github.com/aegis-mcp/aegis/internal/policy"
-	"github.com/aegis-mcp/aegis/internal/profilestate"
+	"github.com/osick/aegis-mcp/internal/approval"
+	"github.com/osick/aegis-mcp/internal/audit"
+	"github.com/osick/aegis-mcp/internal/config"
+	"github.com/osick/aegis-mcp/internal/enforcer"
+	"github.com/osick/aegis-mcp/internal/policy"
+	"github.com/osick/aegis-mcp/internal/profilestate"
 )
 
 func newCore(t *testing.T, buf *bytes.Buffer) *Core {
@@ -1908,9 +1908,9 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/aegis-mcp/aegis/internal/audit"
-	"github.com/aegis-mcp/aegis/internal/enforcer"
-	"github.com/aegis-mcp/aegis/internal/profilestate"
+	"github.com/osick/aegis-mcp/internal/audit"
+	"github.com/osick/aegis-mcp/internal/enforcer"
+	"github.com/osick/aegis-mcp/internal/profilestate"
 )
 
 type Core struct {
@@ -2293,13 +2293,13 @@ import (
 	"log"
 	"os"
 
-	"github.com/aegis-mcp/aegis/internal/approval"
-	"github.com/aegis-mcp/aegis/internal/audit"
-	"github.com/aegis-mcp/aegis/internal/config"
-	"github.com/aegis-mcp/aegis/internal/enforcer"
-	"github.com/aegis-mcp/aegis/internal/gateway"
-	"github.com/aegis-mcp/aegis/internal/policy"
-	"github.com/aegis-mcp/aegis/internal/profilestate"
+	"github.com/osick/aegis-mcp/internal/approval"
+	"github.com/osick/aegis-mcp/internal/audit"
+	"github.com/osick/aegis-mcp/internal/config"
+	"github.com/osick/aegis-mcp/internal/enforcer"
+	"github.com/osick/aegis-mcp/internal/gateway"
+	"github.com/osick/aegis-mcp/internal/policy"
+	"github.com/osick/aegis-mcp/internal/profilestate"
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 )
 

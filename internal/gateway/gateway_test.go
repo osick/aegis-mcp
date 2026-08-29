@@ -4,7 +4,7 @@ import (
 	"context"
 	"testing"
 
-	"github.com/aegis-mcp/aegis/internal/naming"
+	"github.com/osick/aegis-mcp/internal/naming"
 )
 
 func newRegistry(t *testing.T) *Registry {

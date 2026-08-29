@@ -3,9 +3,9 @@ package profilestate
 import (
 	"testing"
 
-	"github.com/aegis-mcp/aegis/internal/approval"
-	"github.com/aegis-mcp/aegis/internal/config"
-	"github.com/aegis-mcp/aegis/internal/policy"
+	"github.com/osick/aegis-mcp/internal/approval"
+	"github.com/osick/aegis-mcp/internal/config"
+	"github.com/osick/aegis-mcp/internal/policy"
 )
 
 type nopChannel struct{}

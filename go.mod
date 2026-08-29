@@ -1,4 +1,4 @@
-module github.com/aegis-mcp/aegis
+module github.com/osick/aegis-mcp
 
 go 1.26.4
 

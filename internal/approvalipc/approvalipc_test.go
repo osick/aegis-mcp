@@ -5,7 +5,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/aegis-mcp/aegis/internal/approval"
+	"github.com/osick/aegis-mcp/internal/approval"
 )
 
 // nopChannel discards notifications; tests drive the store directly.

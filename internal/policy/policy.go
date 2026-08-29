@@ -6,7 +6,7 @@ import (
 	"path"
 	"sort"
 
-	"github.com/aegis-mcp/aegis/internal/config"
+	"github.com/osick/aegis-mcp/internal/config"
 )
 
 type compiledProfile struct {

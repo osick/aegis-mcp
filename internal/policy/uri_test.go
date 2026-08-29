@@ -3,7 +3,7 @@ package policy
 import (
 	"testing"
 
-	"github.com/aegis-mcp/aegis/internal/config"
+	"github.com/osick/aegis-mcp/internal/config"
 )
 
 func TestResourceMatchingAndTraversal(t *testing.T) {

@@ -14,14 +14,14 @@ import (
 	"log"
 	"os"
 
-	"github.com/aegis-mcp/aegis/internal/approval"
-	"github.com/aegis-mcp/aegis/internal/approvalipc"
-	"github.com/aegis-mcp/aegis/internal/audit"
-	"github.com/aegis-mcp/aegis/internal/config"
-	"github.com/aegis-mcp/aegis/internal/enforcer"
-	"github.com/aegis-mcp/aegis/internal/gateway"
-	"github.com/aegis-mcp/aegis/internal/policy"
-	"github.com/aegis-mcp/aegis/internal/profilestate"
+	"github.com/osick/aegis-mcp/internal/approval"
+	"github.com/osick/aegis-mcp/internal/approvalipc"
+	"github.com/osick/aegis-mcp/internal/audit"
+	"github.com/osick/aegis-mcp/internal/config"
+	"github.com/osick/aegis-mcp/internal/enforcer"
+	"github.com/osick/aegis-mcp/internal/gateway"
+	"github.com/osick/aegis-mcp/internal/policy"
+	"github.com/osick/aegis-mcp/internal/profilestate"
 
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 )

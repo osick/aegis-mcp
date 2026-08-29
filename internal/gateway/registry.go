@@ -5,7 +5,7 @@ import (
 	"sort"
 	"sync"
 
-	"github.com/aegis-mcp/aegis/internal/naming"
+	"github.com/osick/aegis-mcp/internal/naming"
 )
 
 // AggregatedTool is a downstream tool with its namespaced wire name.

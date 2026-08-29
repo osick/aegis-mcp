@@ -2,8 +2,8 @@
 package enforcer
 
 import (
-	"github.com/aegis-mcp/aegis/internal/aegiserr"
-	"github.com/aegis-mcp/aegis/internal/policy"
+	"github.com/osick/aegis-mcp/internal/aegiserr"
+	"github.com/osick/aegis-mcp/internal/policy"
 )
 
 type Capability struct {
